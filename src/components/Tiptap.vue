@@ -6,7 +6,6 @@
 .ProseMirror {
   outline: none;
   font-size: 20px;
-  caret-color: transparent;
 
   &[mode="normal"] {
     .vim-cursor {
@@ -24,7 +23,6 @@
       &::after {
         content: " ";
         position: absolute;
-        margin: 0 1px;
         width: 2px;
         background: var(--cursor-background);
         color: transparent;

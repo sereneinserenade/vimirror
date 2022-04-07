@@ -237,17 +237,17 @@ export const Vim = Extension.create({
         for(let i = inlineSelectionIndex; i < nodeWithPos.to; i += 1) {
           const currentChar = content[i]
 
+          if (currentChar === ' ') foundSpace = true
+
           if (foundSpace && currentChar !== ' ') {
-            indexToJump = i
+            indexToJump = i + 1
             break // breaking since we already found the index we want to jump to
           }
-
-          if (currentChar === ' ') foundSpace = true
         }
 
         if (!indexToJump) return false
 
-        const newPos = doc.resolve( nodeWithPos.pos + indexToJump + 1)
+        const newPos = doc.resolve( nodeWithPos.pos + indexToJump)
 
         const newSelection = new TextSelection(newPos, newPos)
 
@@ -292,10 +292,8 @@ export const Vim = Extension.create({
         let foundSpace = false
         let indexToJump: number | undefined = undefined
 
-        for(let i = inlineSelectionIndex - 3; i > nodeWithPos.pos; i -= 1) {
+        for(let i = inlineSelectionIndex - 3; i > 0; i -= 1) {
           const currentChar = content[i]
-
-          debugger
 
           if (currentChar === ' ') foundSpace = true
 
@@ -312,6 +310,45 @@ export const Vim = Extension.create({
         const newSelection = new TextSelection(newPos, newPos)
 
         dispatch(state.tr.setSelection(newSelection))
+
+        return true
+      },
+
+      'I': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        const { doc, selection } = state
+
+        const { from, to } = selection
+
+        if (from !== to) return false
+
+        const nodeWithPos = {
+          node: undefined,
+          pos: 0,
+          to: 0
+        } as { node?: PMNode, pos: number, to: number }
+
+        doc.descendants((node, pos, parent) => {
+          if (!node.isBlock || nodeWithPos.node) return
+
+          const [nodeFrom, nodeTo] = [pos, pos + node.nodeSize]
+
+          if ((nodeFrom <= from) && (from <= nodeTo)) {
+            nodeWithPos.node = node
+            nodeWithPos.pos = pos
+            nodeWithPos.to = nodeTo
+          }
+        })
+
+        const newPos = doc.resolve(nodeWithPos.pos + 1)
+
+        const newSelection = new TextSelection(newPos, newPos)
+
+        const tr = state.tr.setSelection(newSelection)
+        tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert)
+
+        dispatch(tr)
 
         return true
       },
