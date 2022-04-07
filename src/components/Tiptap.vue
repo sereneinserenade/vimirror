@@ -6,7 +6,11 @@
 .ProseMirror {
   outline: none;
   font-size: 20px;
-  /* caret-color: transparent; */
+  caret-color: transparent;
+
+  &[show-cursor="true"] {
+    caret-color: var(--text-color);
+  }
 
   &[mode="normal"] {
     .vim-cursor {
@@ -26,8 +30,7 @@
         position: absolute;
         width: 2px;
         background: var(--cursor-background);
-        animation: blink 0.75s step-start 0s infinite;
-        animation-timing-function: linear;
+        animation: blink 1s step-start 0s infinite;
       }
     }
   }

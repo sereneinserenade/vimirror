@@ -21,9 +21,12 @@ const wordSeparators = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/? "
 
 enum TransactionMeta {
   ChangeModeTo = 'changeModeTo',
+  SetShowCursor = 'setShowCursor'
 }
 
 let mode: VimModes = VimModes.Normal
+
+let showCursor: boolean = false
 
 let cursorDecoration: Decoration
 
@@ -65,7 +68,8 @@ export const Vim = Extension.create({
         attributes() {
           return {
             'vim-active': 'true',
-            'mode': mode
+            'mode': mode,
+            'show-cursor': showCursor ? 'true' : 'false'
           }
         },
         handleDOMEvents: {
@@ -107,18 +111,6 @@ export const Vim = Extension.create({
         apply: (tr, value, oldState, newState) => {
           let { from, to } = newState.selection
 
-          console.log('-----------------')
-
-          console.log(from, to)
-
-          // from = from - 1
-
-          // from = from === 0 ? 1 : from
-
-          console.log(from, to)
-
-          console.log('-----------------')
-
           cursorDecoration = Decoration.inline(from, to + 1, {
             class: 'vim-cursor',
             char: newState.doc.textBetween(from, to + 1)
@@ -131,10 +123,11 @@ export const Vim = Extension.create({
             console.log('newMode:- ', mode)
           }
 
-          decorationSet = DecorationSet.create(newState.doc, [cursorDecoration])
+          const showCursorVal: boolean = tr.getMeta(TransactionMeta.SetShowCursor)
 
-          console.log(decorationSet);
-          
+          if ([true, false].includes(showCursorVal)) showCursor = showCursorVal
+
+          decorationSet = DecorationSet.create(newState.doc, [cursorDecoration])
 
           return { mode, decorationSet }
         },
@@ -147,14 +140,23 @@ export const Vim = Extension.create({
 
         const { selection, doc } = state
 
-        const { from, to } = selection
+        let { from, to } = selection
 
-        const [$from, $to] = [doc.resolve(from - 1), doc.resolve(to - 1)]
+        from = from - 1
+        to = to - 1
+
+        if (from <= 0 && to <= 0) {
+          from = 1
+          to = 1
+        }
+
+        const [$from, $to] = [doc.resolve(from), doc.resolve(to)]
 
         const newSelection = new TextSelection($from, $to)
 
         const tr = state.tr.setSelection(newSelection)
         tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Normal)
+        tr.setMeta(TransactionMeta.SetShowCursor, false)
 
         dispatch(tr)
 
@@ -181,6 +183,30 @@ export const Vim = Extension.create({
 
         const tr = state.tr.setSelection(newSelection)
         tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert)
+        {
+          const nodeWithPos = {
+            node: undefined,
+            pos: 0,
+            to: 0
+          } as { node?: PMNode, pos: number, to: number }
+  
+          doc.descendants((node, pos, parent) => {
+            if (!node.isBlock || nodeWithPos.node) return
+  
+            const [nodeFrom, nodeTo] = [pos, pos + node.nodeSize]
+  
+            if ((nodeFrom <= from) && (from <= nodeTo)) {
+              nodeWithPos.node = node
+              nodeWithPos.pos = pos
+              nodeWithPos.to = nodeTo
+            }
+          })
+
+          if (nodeWithPos.node) {
+            if (to + 1 === nodeWithPos.to - 1) tr.setMeta(TransactionMeta.SetShowCursor, true)
+            debugger
+          }
+        }
 
         dispatch(tr)
 
@@ -395,6 +421,46 @@ export const Vim = Extension.create({
 
         const tr = state.tr.setSelection(newSelection)
         tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert)
+
+        dispatch(tr)
+
+        return true
+      },
+
+      'A': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        const { doc, selection } = state
+
+        const { from, to } = selection
+
+        const nodeWithPos = {
+          node: undefined,
+          pos: 0,
+          to: 0
+        } as { node?: PMNode, pos: number, to: number }
+
+        doc.descendants((node, pos, parent) => {
+          if (!node.isBlock || nodeWithPos.node) return
+
+          const [nodeFrom, nodeTo] = [pos, pos + node.nodeSize]
+
+          if ((nodeFrom <= from) && (from <= nodeTo)) {
+            nodeWithPos.node = node
+            nodeWithPos.pos = pos
+            nodeWithPos.to = nodeTo
+          }
+        })
+
+        if (!nodeWithPos.node) return false
+
+        const newPos = doc.resolve(nodeWithPos.to - 1)
+
+        const newSelection = new TextSelection(newPos, newPos)
+
+        const tr = state.tr.setSelection(newSelection)
+        tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert)
+        tr.setMeta(TransactionMeta.SetShowCursor, true)
 
         dispatch(tr)
 
