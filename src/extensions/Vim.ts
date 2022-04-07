@@ -7,6 +7,8 @@ import { keymap, keydownHandler } from 'prosemirror-keymap'
 
 let decorationSet: DecorationSet
 
+const { log } = console
+
 enum VimModes {
   Normal = 'normal',
   Insert = 'insert',
@@ -116,11 +118,13 @@ export const Vim = Extension.create({
             char: newState.doc.textBetween(from, to + 1)
           })
 
+          log(from, to)
+
           const changeModeTo: VimModes = tr.getMeta(TransactionMeta.ChangeModeTo)
 
           if (VimModesList.includes(changeModeTo)) {
             mode = changeModeTo
-            console.log('newMode:- ', mode)
+            // console.log('newMode:- ', mode)
           }
 
           const showCursorVal: boolean = tr.getMeta(TransactionMeta.SetShowCursor)
@@ -365,13 +369,8 @@ export const Vim = Extension.create({
         for(let i = inlineSelectionIndex - 3; i > 0; i -= 1) {
           const currentChar = content[i]
 
-          if (wordSeparators.includes(currentChar)) {
+          if (wordSeparators.includes(currentChar) && !wordSeparators.includes(content[i + 1])) {
             foundSeparator = true
-            indexToJump = i + 1
-            break
-          }
-
-          if (currentChar === ' ' && content[i + 1] !== ' ') {
             indexToJump = i + 1
             break // breaking since we already found the index we want to jump to
           }
@@ -463,6 +462,21 @@ export const Vim = Extension.create({
         tr.setMeta(TransactionMeta.SetShowCursor, true)
 
         dispatch(tr)
+
+        return true
+      },
+
+      /**
+       * delete only the current character under cursor
+       */
+      'x':  (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        const { selection, doc } = state
+
+        const { from, to, $from, $to } = selection
+
+        dispatch(state.tr.delete(from, to + 1))
 
         return true
       },
