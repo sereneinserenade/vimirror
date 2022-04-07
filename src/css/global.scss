@@ -3,7 +3,7 @@
 :root {
   --background: #21262d;
   --text: #c9d1d9;
-  --cursor-background: rgb(201, 209, 217, 0.5);
+  --cursor-background: var(--text) ;
 }
 
 body, html {
@@ -15,4 +15,14 @@ body, html {
 body {
   background-color: var(--background);
   color: var(--text);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.blink {
+  animation: blink 1s step-start 0s infinite;
 }

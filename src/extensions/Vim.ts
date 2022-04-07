@@ -1,6 +1,7 @@
 import { Extension } from '@tiptap/vue-3'
 import { Decoration, DecorationSet } from 'prosemirror-view'
 import { Plugin, PluginKey, TextSelection } from 'prosemirror-state'
+import { Node as PMNode } from 'prosemirror-model'
 import { baseKeymap } from 'prosemirror-commands'
 import { keymap, keydownHandler } from 'prosemirror-keymap'
 
@@ -31,7 +32,18 @@ declare module '@tiptap/core' {
        * Example Command description.
        */
       // exampleCommand: () => ReturnType,
+    },
+    history: {
+      /**
+       * Undo recent changes
+       */
+      undo: () => ReturnType,
+      /**
+       * Reapply reverted changes
+       */
+      redo: () => ReturnType,
     }
+
   }
 }
 
@@ -41,6 +53,8 @@ export const Vim = Extension.create({
   addProseMirrorPlugins() {
     const extensionThis = this
 
+    const { editor } = this
+
     const vimModesPlugin = new Plugin({
       key: new PluginKey('vimPlugin'),
 
@@ -48,8 +62,11 @@ export const Vim = Extension.create({
         decorations(state) {
           return this.getState(state).decorationSet
         },
-        attributes: {
-          'vim-active': 'true'
+        attributes() {
+          return {
+            'vim-active': 'true',
+            'mode': mode
+          }
         },
         handleDOMEvents: {
           keypress: (view, event) => {
@@ -113,18 +130,18 @@ export const Vim = Extension.create({
     })
 
     const vimKeyMapPlugin = keymap({
-      // enter insert mode
-      'i': (state, dispatch, view) => {
-        if (mode === VimModes.Insert || !dispatch) return false
-
-        dispatch(state.tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert))
-
-        return true
-      },
       'Escape': (state, dispatch, view) => {
         if (!dispatch) return false
 
         dispatch(state.tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Normal))
+
+        return true
+      },
+
+      'i': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        dispatch(state.tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert))
 
         return true
       },
@@ -164,13 +181,103 @@ export const Vim = Extension.create({
         const modesOfJ = [VimModes.Normal, VimModes.Visual, VimModes.Command]
         
         if (modesOfJ.includes(mode)) {
-          // Go down
+          // TODO: go down
+          return true
+        }
+
+        return false
+      },
+      'k': (state, dispatch, view) => {
+        if (!dispatch) return false
+
+        const modesOfK = [VimModes.Normal, VimModes.Visual, VimModes.Command]
+        
+        if (modesOfK.includes(mode)) {
+          // TODO: go up
           return true
         }
 
         return false
       },
 
+      'w': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        // I'm running Tiptap with Vue.js. 🎉
+
+        const { doc, selection } = state
+
+        // TODO: THIS
+        const { from, to, $from, $to } = selection
+
+        if (from !== to) return false
+
+        const nodeWithPos = {
+          node: undefined,
+          pos: 0,
+          to: 0
+        } as { node?: PMNode, pos: number, to: number }
+
+        doc.descendants((node, pos, parent) => {
+          if (!node.isBlock || nodeWithPos.node) return
+
+          const [nodeFrom, nodeTo] = [pos, pos + node.nodeSize]
+
+          if ((nodeFrom <= from) && (from <= nodeTo)) {
+            nodeWithPos.node = node
+            nodeWithPos.pos = pos
+            nodeWithPos.to = nodeTo
+          }
+        })
+
+        const content = nodeWithPos.node?.textContent
+
+        if (!content) throw new Error('If theres no content, where the hell are you pressing the W from?')
+
+        const inlineSelectionIndex = from - nodeWithPos.pos
+
+        let foundSpace = false
+        let indexToJump: number | undefined = undefined
+
+        for(let i = inlineSelectionIndex; i < nodeWithPos.to; i += 1) {
+          const currentChar = content[i]
+
+          if (foundSpace && currentChar !== ' ') {
+            indexToJump = i
+            break // breaking since we already found the index we want to jump to
+          }
+
+          if (currentChar === ' ') foundSpace = true
+        }
+
+        if (!indexToJump) return false
+
+        const newPos = doc.resolve( nodeWithPos.pos + indexToJump + 1)
+
+        const newSelection = new TextSelection(newPos, newPos)
+
+        dispatch(state.tr.setSelection(newSelection))
+
+        return true
+      },
+
+      // undo
+      'u': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        editor.commands.undo?.()
+
+        return true
+      },
+
+      // redo
+      'Ctrl-r': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        editor.commands.redo?.()
+
+        return true
+      }
     })
 
     return [vimModesPlugin, vimKeyMapPlugin]

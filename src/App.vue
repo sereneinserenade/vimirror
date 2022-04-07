@@ -3,7 +3,7 @@ import Tiptap from './components/Tiptap.vue'
 </script>
 
 <template>
-  <main class="flex w-full justify-center">
+  <main class="flex container">
     <Tiptap />
   </main>
 </template>
