@@ -143,7 +143,18 @@ export const Vim = Extension.create({
       'Escape': (state, dispatch, view) => {
         if (!dispatch) return false
 
-        dispatch(state.tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Normal))
+        const { selection, doc } = state
+
+        const { from, to } = selection
+
+        const [$from, $to] = [doc.resolve(from - 1), doc.resolve(to - 1)]
+
+        const newSelection = new TextSelection($from, $to)
+
+        const tr = state.tr.setSelection(newSelection)
+        tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Normal)
+
+        dispatch(tr)
 
         return true
       },
@@ -155,6 +166,25 @@ export const Vim = Extension.create({
 
         return true
       },
+      'a': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        const { selection, doc} = state
+
+        const { from, to } = selection
+
+        const [$from, $to] = [doc.resolve(from + 1), doc.resolve(to + 1)]
+
+        const newSelection = new TextSelection($from, $to)
+
+        const tr = state.tr.setSelection(newSelection)
+        tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert)
+
+        dispatch(tr)
+
+        return true
+      },
+
       'h': (state, dispatch, view) => {
         if (mode === VimModes.Insert || !dispatch) return false
 
