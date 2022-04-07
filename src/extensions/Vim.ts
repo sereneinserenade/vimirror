@@ -17,6 +17,8 @@ enum VimModes {
 
 const VimModesList = [VimModes.Normal, VimModes.Insert, VimModes.Visual, VimModes.Command, VimModes.Replace]
 
+const wordSeparators = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/? "
+
 enum TransactionMeta {
   ChangeModeTo = 'changeModeTo',
 }
@@ -141,7 +143,7 @@ export const Vim = Extension.create({
 
     const vimKeyMapPlugin = keymap({
       'Escape': (state, dispatch, view) => {
-        if (!dispatch) return false
+        if (mode === VimModes.Normal || !dispatch) return false
 
         const { selection, doc } = state
 
@@ -273,16 +275,16 @@ export const Vim = Extension.create({
 
         const inlineSelectionIndex = from - nodeWithPos.pos
 
-        let foundSpace = false
+        let foundSeparator = false
         let indexToJump: number | undefined = undefined
 
         for(let i = inlineSelectionIndex; i < nodeWithPos.to; i += 1) {
           const currentChar = content[i]
 
-          if (currentChar === ' ') foundSpace = true
+          if (wordSeparators.includes(currentChar)) foundSeparator = true
 
-          if (foundSpace && currentChar !== ' ') {
-            indexToJump = i + 1
+          if (foundSeparator) {
+            indexToJump = i + 2
             break // breaking since we already found the index we want to jump to
           }
         }
@@ -331,13 +333,17 @@ export const Vim = Extension.create({
 
         const inlineSelectionIndex = from - nodeWithPos.pos
 
-        let foundSpace = false
+        let foundSeparator = false
         let indexToJump: number | undefined = undefined
 
         for(let i = inlineSelectionIndex - 3; i > 0; i -= 1) {
           const currentChar = content[i]
 
-          if (currentChar === ' ') foundSpace = true
+          if (wordSeparators.includes(currentChar)) {
+            foundSeparator = true
+            indexToJump = i + 1
+            break
+          }
 
           if (currentChar === ' ' && content[i + 1] !== ' ') {
             indexToJump = i + 1
