@@ -93,8 +93,9 @@ export const Vim = Extension.create({
         init: (config, state) => {
           const { from, to } = state.selection
 
-          cursorDecoration = Decoration.inline(from - 1, to, {
-            class: 'vim-cursor'
+          cursorDecoration = Decoration.inline(from, to, {
+            class: 'vim-cursor',
+            char: state.doc.textBetween(from + 1, to + 2)
           })
 
           decorationSet = DecorationSet.create(state.doc, [cursorDecoration])
@@ -104,13 +105,21 @@ export const Vim = Extension.create({
         apply: (tr, value, oldState, newState) => {
           let { from, to } = newState.selection
 
-          from = from - 1
+          console.log('-----------------')
 
-          from = from === 0 ? 1 : from
+          console.log(from, to)
 
-          cursorDecoration = Decoration.inline(from, to, {
+          // from = from - 1
+
+          // from = from === 0 ? 1 : from
+
+          console.log(from, to)
+
+          console.log('-----------------')
+
+          cursorDecoration = Decoration.inline(from, to + 1, {
             class: 'vim-cursor',
-            char: newState.doc.textBetween(from + 1, to + 1)
+            char: newState.doc.textBetween(from, to + 1)
           })
 
           const changeModeTo: VimModes = tr.getMeta(TransactionMeta.ChangeModeTo)
@@ -121,6 +130,9 @@ export const Vim = Extension.create({
           }
 
           decorationSet = DecorationSet.create(newState.doc, [cursorDecoration])
+
+          console.log(decorationSet);
+          
 
           return { mode, decorationSet }
         },

@@ -1,12 +1,25 @@
 @import 'helpers';
 
-:root {
-  --background: #21262d;
-  --text: #c9d1d9;
-  --cursor-background: var(--text) ;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #21262d;
+    --text: #c9d1d9;
+    --cursor-background: var(--text);
+    --cursor-text: var(--background)
+  }
 }
 
-body, html {
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: white;
+    --text: black;
+    --cursor-background: var(--text);
+    --cursor-text: var(--background)
+  }
+}
+
+body,
+html {
   box-sizing: border-box;
   margin: 0;
   padding: 0;

@@ -6,26 +6,26 @@
 .ProseMirror {
   outline: none;
   font-size: 20px;
+  /* caret-color: transparent; */
 
   &[mode="normal"] {
     .vim-cursor {
-      &::after {
+      &::before {
         content: attr(char);
         position: absolute;
         background: var(--cursor-background);
-        color: black;
+        color: var(--cursor-text);
       }
     }
   }
 
   &[mode="insert"] {
     .vim-cursor {
-      &::after {
+      &::before {
         content: " ";
         position: absolute;
         width: 2px;
         background: var(--cursor-background);
-        color: transparent;
         animation: blink 0.75s step-start 0s infinite;
         animation-timing-function: linear;
       }
