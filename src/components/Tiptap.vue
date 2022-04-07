@@ -4,7 +4,6 @@
 
 <style lang="scss">
 .ProseMirror {
-  display: flex;
   outline: none;
   font-size: 20px;
   caret-color: transparent;

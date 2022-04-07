@@ -51,8 +51,6 @@ export const Vim = Extension.create({
   name: 'vim',
 
   addProseMirrorPlugins() {
-    const extensionThis = this
-
     const { editor } = this
 
     const vimModesPlugin = new Plugin({
@@ -203,12 +201,9 @@ export const Vim = Extension.create({
       'w': (state, dispatch, view) => {
         if (mode === VimModes.Insert || !dispatch) return false
 
-        // I'm running Tiptap with Vue.js. 🎉
-
         const { doc, selection } = state
 
-        // TODO: THIS
-        const { from, to, $from, $to } = selection
+        const { from, to } = selection
 
         if (from !== to) return false
 
@@ -253,6 +248,66 @@ export const Vim = Extension.create({
         if (!indexToJump) return false
 
         const newPos = doc.resolve( nodeWithPos.pos + indexToJump + 1)
+
+        const newSelection = new TextSelection(newPos, newPos)
+
+        dispatch(state.tr.setSelection(newSelection))
+
+        return true
+      },
+
+      'b': (state, dispatch, view) => {
+        if (mode === VimModes.Insert || !dispatch) return false
+
+        const { doc, selection } = state
+
+        const { from, to } = selection
+
+        if (from !== to) return false
+
+        const nodeWithPos = {
+          node: undefined,
+          pos: 0,
+          to: 0
+        } as { node?: PMNode, pos: number, to: number }
+
+        doc.descendants((node, pos, parent) => {
+          if (!node.isBlock || nodeWithPos.node) return
+
+          const [nodeFrom, nodeTo] = [pos, pos + node.nodeSize]
+
+          if ((nodeFrom <= from) && (from <= nodeTo)) {
+            nodeWithPos.node = node
+            nodeWithPos.pos = pos
+            nodeWithPos.to = nodeTo
+          }
+        })
+
+        const content = nodeWithPos.node?.textContent
+
+        if (!content) throw new Error('If theres no content, where the hell are you pressing the "b" from?')
+
+        const inlineSelectionIndex = from - nodeWithPos.pos
+
+        let foundSpace = false
+        let indexToJump: number | undefined = undefined
+
+        for(let i = inlineSelectionIndex - 3; i > nodeWithPos.pos; i -= 1) {
+          const currentChar = content[i]
+
+          debugger
+
+          if (currentChar === ' ') foundSpace = true
+
+          if (currentChar === ' ' && content[i + 1] !== ' ') {
+            indexToJump = i + 1
+            break // breaking since we already found the index we want to jump to
+          }
+        }
+
+        if (!indexToJump) return false
+
+        const newPos = doc.resolve(nodeWithPos.pos + indexToJump + 1)
 
         const newSelection = new TextSelection(newPos, newPos)
 
