@@ -1,4 +1,4 @@
-import { Actions, Motions, VimModes } from './vimTypes'
+import { Actions, Motions, VimModes } from './types'
 
 type CommandType = 'motion' | 'action' | 'keyToKey' | 'operator' | 'operatorMotion' | 'search'
 

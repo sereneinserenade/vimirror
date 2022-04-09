@@ -6,7 +6,7 @@ import { Node as PMNode } from 'prosemirror-model'
 import { keymap } from 'prosemirror-keymap'
 
 import { defaultKeymap, KeyType } from './defaultKeymap'
-import { Action, Actions, Motion, Motions, VimModes } from './vimTypes'
+import { Action, Actions, Motion, Motions, VimModes } from './types'
 
 const mappedDefaultKeyMap: Record<string, KeyType> = {}
 
