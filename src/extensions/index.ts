@@ -1,1 +1,1 @@
-export * from './Vim'
+export * from './vim'
