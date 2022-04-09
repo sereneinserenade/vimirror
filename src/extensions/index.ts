@@ -1,1 +1,1 @@
-export { default as Vim } from './vim'
+export { default as Vim } from './vimExtension'
