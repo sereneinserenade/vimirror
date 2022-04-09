@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import { Vim } from '../extensions'
+import { Vim } from '../extensions/index'
 
 const editor = useEditor({
   content: '<p> This is an  example of VIM mode in Tiptap/ProseMirror. How do you like the name btw? </p>',

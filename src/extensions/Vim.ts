@@ -256,7 +256,7 @@ const actions: ActionsInterface = {
   },
 }
 
-export const Vim = Extension.create({
+const Vim = Extension.create({
   name: 'vim',
 
   addProseMirrorPlugins() {
@@ -602,3 +602,5 @@ export const Vim = Extension.create({
     }
   }
 })
+
+export default Vim
