@@ -2,9 +2,9 @@
   <img src="src/assets/vimirror-logo.svg" width="200"/>
 </p>
 
-# vimirror
+<h1 align="center"> ViMirror </h1>
 
-VIM for [Tiptap](https://tiptap.dev)/[ProseMirror](https://prosemirror.net)
+VIM keybindings for [ProseMirror](https://prosemirror.net) / [Tiptap](https://tiptap.dev).
 
 # Demo
 
