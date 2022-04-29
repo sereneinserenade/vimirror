@@ -320,7 +320,7 @@ const Vim = Extension.create({
             char: newState.doc.textBetween(from, to + 1)
           })
 
-          log(from, to)
+          // log(from, to)
 
           const changeModeTo: VimModes = tr.getMeta(TransactionMeta.ChangeModeTo)
 
@@ -351,19 +351,6 @@ const Vim = Extension.create({
     })
 
     // const vimKeyMapPlugin = keymap({
-    //   'Escape': (state, dispatch, view) => {
-    //     if (mode === VimModes.Normal || !dispatch) return false
-
-    //   },
-
-    //   'i': (state, dispatch, view) => {
-    //     if (mode === VimModes.Insert || !dispatch) return false
-
-    //     dispatch(state.tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert))
-
-    //     return true
-    //   },
-
     //   'a': (state, dispatch, view) => {
     //     if (mode === VimModes.Insert || !dispatch) return false
 
@@ -376,7 +363,9 @@ const Vim = Extension.create({
     //     const newSelection = new TextSelection($from, $to)
 
     //     const tr = state.tr.setSelection(newSelection)
+
     //     tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Insert)
+
     //     {
     //       const nodeWithPos = {
     //         node: undefined,
@@ -407,36 +396,6 @@ const Vim = Extension.create({
     //     return true
     //   },
 
-    //   'h': (state, dispatch, view) => {
-    //     if (mode === VimModes.Insert || !dispatch) return false
-
-    //     const { doc } = state
-
-    //     const { from, to} = state.selection
-
-    //     const [$from, $to] = [doc.resolve(from - 1), doc.resolve(to - 1)]
-
-    //     const selection = new TextSelection($from, $to)
-
-    //     dispatch(state.tr.setSelection(selection))
-
-    //     return true
-    //   },
-    //   'l': (state, dispatch, view) => {
-    //     if (mode === VimModes.Insert || !dispatch) return false
-
-    //     const { doc } = state
-
-    //     const { from, to} = state.selection
-
-    //     const [$from, $to] = [doc.resolve(from + 1), doc.resolve(to + 1)]
-
-    //     const selection = new TextSelection($from, $to)
-
-    //     dispatch(state.tr.setSelection(selection))
-
-    //     return true
-    //   },
     //   'j': (state, dispatch, view) => {
     //     if (!dispatch) return false
 
