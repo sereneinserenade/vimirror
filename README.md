@@ -8,7 +8,9 @@ VIM keybindings for [ProseMirror](https://prosemirror.net) / [Tiptap](https://ti
 
 # Demo
 
-- Can be visited at https://sereneinserenade.github.io/vimirror/
+- check it out at https://sereneinserenade.github.io/vimirror/
+
+https://user-images.githubusercontent.com/45892659/165941469-41e75dc0-359e-49cc-8bc2-d1f7559208a8.mov
 
 # Contributing
 
