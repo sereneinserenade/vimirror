@@ -1,3 +1,4 @@
+@import 'bootstrap';
 @import 'helpers';
 
 @media (prefers-color-scheme: dark) {
@@ -44,4 +45,8 @@ body {
 
 .blink {
   animation: blink 1s step-start 0s infinite;
+}
+
+hr {
+  width: 100%;
 }
