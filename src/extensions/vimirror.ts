@@ -229,9 +229,7 @@ const actions: ActionsInterface = {
 
     return true
   },
-  [Actions.EnterNormalMode]: ({ editor: { state, view: { dispatch } } }) => {
-    const { selection, doc } = state
-
+  [Actions.EnterNormalMode]: ({ editor: { state: { selection, doc, tr }, view: { dispatch } } }) => {
     let { from, to } = selection
 
     from = from - 1
@@ -246,21 +244,44 @@ const actions: ActionsInterface = {
 
     const newSelection = new TextSelection($from, $to)
 
-    const tr = state.tr.setSelection(newSelection)
-    tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Normal)
-    tr.setMeta(TransactionMeta.SetShowCursor, false)
+    tr = tr.setMeta(TransactionMeta.ChangeModeTo, VimModes.Normal)
+    tr = tr.setMeta(TransactionMeta.SetShowCursor, false)
+
+    if (currentVimMode === VimModes.Insert) tr = tr.setSelection(newSelection)
 
     dispatch(tr)
 
     return true
   },
+  [Actions.Undo]:  ({ editor }) => {
+    if (currentVimMode === VimModes.Insert) return false
+
+    return editor.commands.undo()
+  },
+  [Actions.Redo]: () => {
+    if (currentVimMode === VimModes.Insert) return false
+
+    return editor.commands.redo()
+  }
 }
 
-const Vim = Extension.create({
-  name: 'vim',
+interface VimirrorOptions {
+  updateValue: ({ mode }: { mode: string}) => void
+}
+
+const Vimirror = Extension.create<VimirrorOptions>({
+  name: 'vimirror',
+
+  addOptions() {
+    return {
+      // allowing user to be informed about updates about VIM modes/keys and stuff
+      updateValue: () => {},
+    }
+  },
 
   addProseMirrorPlugins() {
     editor = this.editor
+    const options = this.options
 
     const vimModesPlugin = new Plugin({
       key: new PluginKey('vimPlugin'),
@@ -278,6 +299,7 @@ const Vim = Extension.create({
         },
         handleDOMEvents: {
           keypress: (view, event) => {
+            // this only serves purpose of not letting any keys work while escape mode
             if (currentVimMode !== VimModes.Insert) event.preventDefault()
 
             return true
@@ -300,25 +322,21 @@ const Vim = Extension.create({
       },
 
       state: {
-        init: (config, state) => {
+        init: (_, state) => {
           const { from, to } = state.selection
 
-          cursorDecoration = Decoration.inline(from, to, {
-            class: 'vim-cursor',
-            char: state.doc.textBetween(from + 1, to + 2)
-          })
+          cursorDecoration = Decoration.inline(from, to + 1, { class: 'vim-cursor' })
+
+          options.updateValue({ mode: currentVimMode })
 
           decorationSet = DecorationSet.create(state.doc, [cursorDecoration])
 
           return { mode: currentVimMode, decorationSet }
         },
-        apply: (tr, value, oldState, newState) => {
+        apply: (tr, _, __, newState) => {
           let { from, to } = newState.selection
 
-          cursorDecoration = Decoration.inline(from, to + 1, {
-            class: 'vim-cursor',
-            char: newState.doc.textBetween(from, to + 1)
-          })
+          cursorDecoration = Decoration.inline(from, to + 1, { class: 'vim-cursor' })
 
           // log(from, to)
 
@@ -327,6 +345,8 @@ const Vim = Extension.create({
           if (VimModesList.includes(changeModeTo)) {
             currentVimMode = changeModeTo
             // console.log('newMode:- ', mode)
+
+            options.updateValue({ mode: currentVimMode })
           }
 
           const showCursorVal: boolean = tr.getMeta(TransactionMeta.SetShowCursor)
@@ -562,4 +582,6 @@ const Vim = Extension.create({
   }
 })
 
-export default Vim
+export {
+  Vimirror
+} 

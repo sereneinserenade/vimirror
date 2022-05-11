@@ -1,2 +1,2 @@
-export { default as Vim } from './vimExtension'
+export * from './vimirror'
 export * from './defaultKeymap'

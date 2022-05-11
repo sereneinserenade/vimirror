@@ -142,6 +142,9 @@ export const defaultKeymap: KeyType[] = [
   // Actions
   { keys: 'Escape', type: 'action', action: Actions.EnterNormalMode },
   { keys: 'i', type: 'action', action: Actions.EnterInsertMode, mode: VimModes.Normal },
+  { keys: 'u', type: 'action', action: Actions.Undo, mode: VimModes.Normal },
+  { keys: 'Ctrl-r', type: 'action', action: Actions.Redo }, // { keys: 'c-r', type: 'action', action: Actions.Redo },
+
   // { keys: 'I', type: 'action', action: 'enterInsertMode', isEdit: true, actionArgs: { insertAt: 'firstNonBlank' }, context: 'normal' },
   // { keys: '<C-i>', type: 'action', action: 'jumpListWalk', actionArgs: { forward: true } },
   // { keys: '<C-o>', type: 'action', action: 'jumpListWalk', actionArgs: { forward: false } },
@@ -173,7 +176,6 @@ export const defaultKeymap: KeyType[] = [
   // Handle Replace-mode as a special case of insert mode.
   // { keys: 'R', type: 'action', action: 'enterInsertMode', isEdit: true, actionArgs: { replace: true }, context: 'normal' },
   // { keys: 'R', type: 'operator', operator: 'change', operatorArgs: { linewise: true, fullLine: true }, context: 'visual', exitVisualBlock: true },
-  // { keys: 'u', type: 'action', action: 'undo', context: 'normal' },
   // { keys: 'u', type: 'operator', operator: 'changeCase', operatorArgs: { toLower: true }, context: 'visual', isEdit: true },
   // { keys: 'U', type: 'operator', operator: 'changeCase', operatorArgs: { toLower: false }, context: 'visual', isEdit: true },
   // { keys: '<C-r>', type: 'action', action: 'redo' },

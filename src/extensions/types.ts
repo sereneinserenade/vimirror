@@ -23,5 +23,7 @@ export type Action = ({ editor }: { editor: Editor }) => boolean
 
 export enum Actions {
   EnterInsertMode = 'enterInsertMode',
-  EnterNormalMode = 'enterNormalMode'
+  EnterNormalMode = 'enterNormalMode',
+  Undo = 'undo',
+  Redo = 'redo',
 }

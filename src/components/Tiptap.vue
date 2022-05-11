@@ -2,12 +2,18 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 
-import { Vim, defaultKeymap } from '../extensions'
+import { Vimirror, defaultKeymap } from '../extensions'
 import { editorStateMock } from '../mocks'
+import { ref } from 'vue';
+
+const currentVimMode = ref("")
 
 const editor = useEditor({
   content: editorStateMock,
-  extensions: [StarterKit, Vim],
+  extensions: [
+    StarterKit,
+    Vimirror.configure({ updateValue: ({ mode }) => currentVimMode.value = mode })
+  ],
   autofocus: 'start',
 })
 
@@ -26,8 +32,15 @@ const supportedCommands = defaultKeymap.map((val) => val.keys).join(', ')
 
     <editor-content class="editor-content" :editor="editor" />
 
-    <section class="supported-commands-container flex flex-col">
+    <section>
+      <span class="text-uppercase">
+        -- {{ currentVimMode }} --
+      </span>
+    </section>
 
+    <hr />
+
+    <section class="supported-commands-container flex flex-col">
       <h2> List of Supported Commands </h2>
 
       <span class="supported-commands"> {{ supportedCommands }} </span>
@@ -43,10 +56,10 @@ const supportedCommands = defaultKeymap.map((val) => val.keys).join(', ')
     padding: 1em;
     margin: 1em 0;
     border-radius: 20px;
-    border-left: 1px solid white;
-    border-top: 1px solid white;
-    border-right: 8px solid white;
-    border-bottom: 8px solid white;
+    border-left: 1px solid var(--text);
+    border-top: 1px solid var(--text);
+    border-right: 8px solid var(--text);
+    border-bottom: 8px solid var(--text);
     width: 100%;
     max-width: 100%;
 
@@ -61,12 +74,8 @@ const supportedCommands = defaultKeymap.map((val) => val.keys).join(', ')
 
       &[mode="normal"] {
         .vim-cursor {
-          &::before {
-            content: attr(char);
-            position: absolute;
-            background: var(--cursor-background);
-            color: var(--cursor-text);
-          }
+          background: var(--cursor-background);
+          color: var(--cursor-text);
         }
       }
 
@@ -85,6 +94,7 @@ const supportedCommands = defaultKeymap.map((val) => val.keys).join(', ')
   }
 
   .supported-commands-container {
+    padding: 2px;
 
     .supported-commands {
       font-family: 'Courier New', Courier, monospace;
