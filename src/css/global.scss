@@ -1,5 +1,5 @@
-@import 'bootstrap';
-@import 'helpers';
+@use 'bootstrap';
+@use 'helpers';
 
 @media (prefers-color-scheme: dark) {
   :root {

@@ -9,17 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tiptap/starter-kit": "^2.0.0-beta.183",
-    "@tiptap/vue-3": "^2.0.0-beta.90",
-    "@vueuse/core": "^8.2.5",
-    "vue": "^3.2.31"
+    "@tiptap/starter-kit": "^2.11.5",
+    "@tiptap/vue-3": "^2.11.5",
+    "@vueuse/core": "^12.7.0",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@types/node": "^17.0.23",
-    "@vitejs/plugin-vue": "^2.3.0",
-    "sass": "^1.49.11",
-    "typescript": "^4.5.4",
-    "vite": "^2.9.0",
-    "vue-tsc": "^0.29.8"
+    "@types/node": "^22.13.4",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "sass": "^1.85.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vue-tsc": "^2.2.2"
   }
 }
